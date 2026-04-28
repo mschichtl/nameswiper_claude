@@ -136,16 +136,30 @@ def _swipe_queue(user, sex_filter):
         .values_list('name_group_id', flat=True)
     )
 
-    unswiped, skipped = [], []
+    # Names liked by other members of the user's groups — surface these first
+    other_member_ids = (
+        GroupMembership.objects
+        .filter(group__in=user.naming_groups.all())
+        .exclude(user=user)
+        .values_list('user_id', flat=True)
+    )
+    liked_by_others = set(
+        Swipe.objects.filter(user_id__in=other_member_ids, decision=Swipe.LIKE)
+        .values_list('name_group_id', flat=True)
+    )
+
+    priority, regular, skipped = [], [], []
     for ng in qs:
         if ng.id in decided_ids:
             continue
         if ng.id in skipped_ids:
             skipped.append(ng)
+        elif ng.id in liked_by_others:
+            priority.append(ng)
         else:
-            unswiped.append(ng)
+            regular.append(ng)
 
-    return unswiped + skipped
+    return priority + regular + skipped
 
 
 @login_required
