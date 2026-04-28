@@ -76,7 +76,7 @@
   <div class="progress-info" id="progress-info"></div>
 </div>
 
-<script id="names-data" type="application/json">{{ names_data_json }}</script>
+{{ names_data|json_script:"names-data" }}
 {% endblock %}
 
 {% block extra_js %}

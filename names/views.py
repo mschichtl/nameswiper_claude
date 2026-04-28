@@ -163,7 +163,7 @@ def swipe_view(request):
     ]
 
     return render(request, 'names/swipe.html', {
-        'names_data_json': json.dumps(names_data),
+        'names_data': names_data,
         'sex_filter': sex_filter,
         'remaining': len(queue),
     })
