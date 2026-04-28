@@ -64,6 +64,50 @@ Sex is an attribute of the name group, not of individual variants. During swipin
 | Swipe UI | CDN-loaded JS library (e.g. Hammer.js) | Touch/drag gestures without a frontend framework |
 | Layout | Responsive CSS | Must work on mobile screens; swiping is a primary mobile interaction |
 
+### Development Setup
+
+A `venv` virtual environment lives in the `venv/` directory at the project root. Always activate it before running any Python commands:
+
+```bash
+# Windows (PowerShell)
+venv\Scripts\Activate.ps1
+
+# Windows (bash/Git Bash)
+source venv/Scripts/activate
+
+# macOS / Linux
+source venv/bin/activate
+```
+
+All dependencies are tracked in `requirements.txt`. After installing or upgrading any package, update it:
+
+```bash
+pip freeze > requirements.txt
+```
+
+To install dependencies in a fresh environment:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Running the dev server
+
+```bash
+source venv/Scripts/activate   # Windows bash / Git Bash
+python manage.py runserver 0.0.0.0:8000
+```
+
+Open `http://localhost:8000` in a browser. Other devices on the local network can connect via `http://<your-ip>:8000`.
+
+First-time setup:
+
+```bash
+python manage.py migrate
+python manage.py loaddata dummy_names   # loads the 23 dummy name groups
+python manage.py createsuperuser        # optional – for Django admin access
+```
+
 ### Current phase constraints
 - Maximum ~2 users on a local network
 - No scalability or parallel-processing optimizations needed yet
@@ -73,12 +117,13 @@ Sex is an attribute of the name group, not of individual variants. During swipin
 
 ## Project Status
 
-- [ ] Project setup (Django app, SQLite, basic auth)
-- [ ] Data model (name groups, variants, sex, swipes, scores, groups, memberships)
-- [ ] Dummy name dataset
-- [ ] Group creation & invite link flow
-- [ ] Swiping UI
-- [ ] Scoring UI (stars, variant checkmarks, comments)
-- [ ] Results view
-- [ ] Retroactive swipe/score editing
-- [ ] Sex filter across all views
+- [x] Project setup (Django app, SQLite, basic auth)
+- [x] Data model (name groups, variants, sex, swipes, scores, groups, memberships)
+- [x] Dummy name dataset (23 name groups across male / female / neutral)
+- [x] Group creation & invite link flow
+- [x] Swiping UI (swipe gesture + buttons + keyboard shortcuts)
+- [x] Scoring UI (stars, variant checkmarks, comments)
+- [x] Results view (ranked by average score)
+- [x] Retroactive swipe/score editing
+- [x] Sex filter across all views
+- [ ] Full name dataset (later workstream)

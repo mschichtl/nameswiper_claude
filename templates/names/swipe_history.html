@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Swipe History – NameSwiper{% endblock %}
+
+{% block extra_css %}
+.decision-badge { min-width: 80px; text-align: center; }
+.decision-btn { min-width: 70px; }
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="h4 mb-0">Swipe history</h2>
+  <a href="{% url 'swipe' %}" class="btn btn-primary btn-sm">Continue swiping</a>
+</div>
+
+{% if swipes %}
+<div class="card shadow-sm">
+  <div class="list-group list-group-flush" id="swipe-list">
+    {% for swipe in swipes %}
+    <div class="list-group-item d-flex justify-content-between align-items-center py-3" id="swipe-row-{{ swipe.id }}">
+      <div>
+        <strong>{{ swipe.name_group.display_name }}</strong>
+        <span class="badge bg-secondary ms-2 small">{{ swipe.name_group.get_sex_display }}</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge decision-badge {% if swipe.decision == 'like' %}bg-success{% elif swipe.decision == 'dislike' %}bg-danger{% else %}bg-secondary{% endif %}" id="badge-{{ swipe.id }}">
+          {% if swipe.decision == 'like' %}✓ Like{% elif swipe.decision == 'dislike' %}✗ Nope{% else %}⟳ Skip{% endif %}
+        </span>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-success decision-btn" onclick="editSwipe({{ swipe.id }}, 'like')">✓</button>
+          <button class="btn btn-outline-secondary decision-btn" onclick="editSwipe({{ swipe.id }}, 'skip')">⟳</button>
+          <button class="btn btn-outline-danger decision-btn" onclick="editSwipe({{ swipe.id }}, 'dislike')">✗</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="text-center text-muted py-5">
+  <p>No swipes yet. <a href="{% url 'swipe' %}">Start swiping!</a></p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCsrf() {
+  return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+
+async function editSwipe(swipeId, decision) {
+  const res = await fetch(`/swipe/${swipeId}/edit/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ decision }),
+  });
+  if (!res.ok) return;
+
+  const badge = document.getElementById(`badge-${swipeId}`);
+  const labels = { like: '✓ Like', dislike: '✗ Nope', skip: '⟳ Skip' };
+  const colors = { like: 'bg-success', dislike: 'bg-danger', skip: 'bg-secondary' };
+  badge.className = `badge decision-badge ${colors[decision]}`;
+  badge.textContent = labels[decision];
+}
+</script>
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block title %}Swipe – NameSwiper{% endblock %}
+
+{% block extra_css %}
+.swipe-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 140px);
+  justify-content: center;
+  padding: 1rem 0;
+}
+.card-stack {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  height: 260px;
+}
+.swipe-card {
+  position: absolute;
+  inset: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.swipe-card:active { cursor: grabbing; }
+.name-display { font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 700; text-align: center; line-height: 1.2; }
+.sex-badge { margin-top: 0.75rem; }
+.like-label, .dislike-label, .skip-label {
+  position: absolute;
+  top: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  opacity: 0;
+  border: 3px solid;
+  border-radius: 6px;
+  padding: 0.2rem 0.7rem;
+  pointer-events: none;
+  transition: opacity 0.05s;
+}
+.like-label { right: 1.5rem; color: #198754; border-color: #198754; transform: rotate(15deg); }
+.dislike-label { left: 1.5rem; color: #dc3545; border-color: #dc3545; transform: rotate(-15deg); }
+.skip-label { top: 1.5rem; left: 50%; transform: translateX(-50%); color: #6c757d; border-color: #6c757d; }
+.action-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.action-buttons .btn { min-width: 90px; border-radius: 50px; font-weight: 600; }
+.progress-info { color: #6c757d; font-size: 0.85rem; margin-top: 1rem; }
+.all-done { text-align: center; padding: 2rem; }
+{% endblock %}
+
+{% block content %}
+<div class="swipe-area">
+  <div class="card-stack" id="card-container">
+    <div class="swipe-card" id="swipe-card">
+      <div class="like-label" id="like-label">LIKE ✓</div>
+      <div class="dislike-label" id="dislike-label">NOPE ✗</div>
+      <div class="skip-label" id="skip-label">SKIP</div>
+      <div class="name-display" id="name-text"></div>
+      <div class="sex-badge" id="sex-badge"></div>
+    </div>
+  </div>
+
+  <div class="action-buttons" id="action-buttons">
+    <button class="btn btn-outline-danger" onclick="doSwipe('dislike')">✗ Nope</button>
+    <button class="btn btn-outline-secondary" onclick="doSwipe('skip')">⟳ Skip</button>
+    <button class="btn btn-outline-success" onclick="doSwipe('like')">✓ Like</button>
+  </div>
+
+  <div class="progress-info" id="progress-info"></div>
+</div>
+
+<script id="names-data" type="application/json">{{ names_data_json }}</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const namesData = JSON.parse(document.getElementById('names-data').textContent);
+let idx = 0;
+let startX = null, startY = null, dragging = false;
+
+const card = document.getElementById('swipe-card');
+const nameText = document.getElementById('name-text');
+const sexBadge = document.getElementById('sex-badge');
+const likeLabel = document.getElementById('like-label');
+const dislikeLabel = document.getElementById('dislike-label');
+const skipLabel = document.getElementById('skip-label');
+const progressInfo = document.getElementById('progress-info');
+const actionButtons = document.getElementById('action-buttons');
+
+function getCsrf() {
+  return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+
+function renderCard() {
+  if (idx >= namesData.length) {
+    document.getElementById('card-container').innerHTML = `
+      <div class="all-done">
+        <div style="font-size:3rem">🎉</div>
+        <h3 class="mt-3">All done!</h3>
+        <p class="text-muted">You've swiped through all names.</p>
+        <a href="/groups/" class="btn btn-primary mt-2">View groups &amp; results</a>
+      </div>`;
+    actionButtons.style.display = 'none';
+    progressInfo.textContent = '';
+    return;
+  }
+  const name = namesData[idx];
+  card.dataset.nameGroupId = name.id;
+  nameText.textContent = name.display;
+
+  const sexColors = { Male: 'primary', Female: 'danger', Neutral: 'secondary' };
+  const color = sexColors[name.sex] || 'secondary';
+  sexBadge.innerHTML = `<span class="badge bg-${color}">${name.sex}</span>`;
+
+  card.style.transition = 'none';
+  card.style.transform = '';
+  card.style.opacity = '1';
+  [likeLabel, dislikeLabel, skipLabel].forEach(l => l.style.opacity = '0');
+
+  const left = namesData.length - idx;
+  progressInfo.textContent = `${left} name${left !== 1 ? 's' : ''} remaining`;
+}
+
+async function doSwipe(decision) {
+  if (idx >= namesData.length) return;
+  const nameGroupId = card.dataset.nameGroupId;
+
+  card.style.transition = 'transform 0.35s ease, opacity 0.35s';
+  if (decision === 'like') {
+    card.style.transform = 'translateX(120vw) rotate(30deg)';
+  } else if (decision === 'dislike') {
+    card.style.transform = 'translateX(-120vw) rotate(-30deg)';
+  } else {
+    card.style.transform = 'translateY(-80vh)';
+  }
+  card.style.opacity = '0';
+
+  await fetch('/swipe/action/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ name_group_id: parseInt(nameGroupId), decision }),
+  });
+
+  idx++;
+  setTimeout(renderCard, 380);
+}
+
+// Touch & mouse drag
+function onStart(e) {
+  const pt = e.touches ? e.touches[0] : e;
+  startX = pt.clientX;
+  startY = pt.clientY;
+  dragging = true;
+  card.style.transition = 'none';
+}
+
+function onMove(e) {
+  if (!dragging || startX === null) return;
+  const pt = e.touches ? e.touches[0] : e;
+  const dx = pt.clientX - startX;
+  const dy = pt.clientY - startY;
+  card.style.transform = `translateX(${dx}px) translateY(${dy * 0.3}px) rotate(${dx * 0.04}deg)`;
+
+  const threshold = 50;
+  likeLabel.style.opacity = dx > threshold ? Math.min(1, (dx - threshold) / 60) : '0';
+  dislikeLabel.style.opacity = dx < -threshold ? Math.min(1, (-dx - threshold) / 60) : '0';
+  if (e.cancelable) e.preventDefault();
+}
+
+function onEnd(e) {
+  if (!dragging || startX === null) return;
+  dragging = false;
+  const pt = e.changedTouches ? e.changedTouches[0] : e;
+  const dx = pt.clientX - startX;
+
+  if (dx > 80) doSwipe('like');
+  else if (dx < -80) doSwipe('dislike');
+  else {
+    card.style.transition = 'transform 0.3s';
+    card.style.transform = '';
+    [likeLabel, dislikeLabel, skipLabel].forEach(l => l.style.opacity = '0');
+  }
+  startX = null;
+}
+
+card.addEventListener('touchstart', onStart, { passive: true });
+card.addEventListener('touchmove', onMove, { passive: false });
+card.addEventListener('touchend', onEnd);
+card.addEventListener('mousedown', onStart);
+document.addEventListener('mousemove', onMove);
+document.addEventListener('mouseup', onEnd);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') doSwipe('like');
+  else if (e.key === 'ArrowLeft') doSwipe('dislike');
+  else if (e.key === 'ArrowUp' || e.key === ' ') { e.preventDefault(); doSwipe('skip'); }
+});
+
+renderCard();
+</script>
+{% endblock %}

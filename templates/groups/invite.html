@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Join Group – NameSwiper{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-8 col-md-5 col-lg-4">
+    <div class="card shadow-sm text-center">
+      <div class="card-body p-4">
+        <h2 class="h5 mb-1">You've been invited to join</h2>
+        <h3 class="h4 fw-bold mb-4">{{ group.name }}</h3>
+
+        {% if already_member %}
+          <p class="text-muted mb-3">You're already a member of this group.</p>
+          <a href="{% url 'group_detail' group.pk %}" class="btn btn-primary">Go to group</a>
+        {% else %}
+          <p class="text-muted mb-4">{{ group.members.count }} member{{ group.members.count|pluralize }} already in this group.</p>
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-lg w-100">Join group</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

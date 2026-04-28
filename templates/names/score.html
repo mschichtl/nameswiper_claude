@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Score Names – {{ naming_group.name }}{% endblock %}
+
+{% block extra_css %}
+.star-row { display: flex; gap: 0.25rem; }
+.star {
+  font-size: 2rem;
+  color: #dee2e6;
+  cursor: pointer;
+  transition: color 0.1s;
+  line-height: 1;
+}
+.star.active { color: #ffc107; }
+.save-indicator { font-size: 0.85rem; color: #198754; display: none; }
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-1">
+  <a href="{% url 'group_detail' naming_group.id %}" class="text-muted small">← {{ naming_group.name }}</a>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="h4 mb-0">Score names</h2>
+  <a href="{% url 'results' naming_group.id %}" class="btn btn-success btn-sm">View results →</a>
+</div>
+
+{% if names_with_scores %}
+  <div class="row g-3">
+    {% for item in names_with_scores %}
+    {% with ng=item.name_group score=item.score variant_ids=item.preferred_variant_ids %}
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm h-100" id="score-card-{{ ng.id }}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h5 class="mb-0">{{ ng.display_name }}</h5>
+              <span class="badge bg-secondary small">{{ ng.get_sex_display }}</span>
+            </div>
+            <span class="save-indicator" id="saved-{{ ng.id }}">✓ Saved</span>
+          </div>
+
+          <!-- Star rating -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Your rating</label>
+            <div class="star-row" data-ng-id="{{ ng.id }}" data-current="{{ score.stars|default:0 }}">
+              {% for i in "12345" %}
+              <span class="star {% if score.stars >= forloop.counter %}active{% endif %}" data-value="{{ forloop.counter }}">★</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Variant preference (only if multiple variants) -->
+          {% if ng.variants.count > 1 %}
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Preferred spelling(s)</label>
+            <div class="d-flex flex-wrap gap-2" id="variants-{{ ng.id }}">
+              {% for variant in ng.variants.all %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="{{ variant.id }}"
+                  id="v-{{ variant.id }}"
+                  {% if variant.id in variant_ids %}checked{% endif %}>
+                <label class="form-check-label" for="v-{{ variant.id }}">{{ variant.name }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Comment -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Comment <span class="text-muted fw-normal">(optional)</span></label>
+            <textarea class="form-control form-control-sm" id="comment-{{ ng.id }}" rows="2"
+              placeholder="e.g. I prefer the shorter spelling">{{ score.comment|default:'' }}</textarea>
+          </div>
+
+          <button class="btn btn-primary btn-sm" onclick="saveScore({{ ng.id }})">Save</button>
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center text-muted py-5">
+    <p class="mb-1">No mutually liked names yet.</p>
+    <p class="small">All group members need to like a name before it appears here.</p>
+    <a href="{% url 'swipe' %}" class="btn btn-primary mt-2">Keep swiping</a>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const groupId = {{ naming_group.id }};
+
+function getCsrf() {
+  return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+
+// Star rating logic
+document.querySelectorAll('.star-row').forEach(row => {
+  const stars = row.querySelectorAll('.star');
+  let current = parseInt(row.dataset.current) || 0;
+
+  function paint(value) {
+    stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.value) <= value));
+  }
+
+  stars.forEach(star => {
+    star.addEventListener('mouseenter', () => paint(parseInt(star.dataset.value)));
+    star.addEventListener('mouseleave', () => paint(current));
+    star.addEventListener('click', () => {
+      current = parseInt(star.dataset.value);
+      row.dataset.current = current;
+      paint(current);
+    });
+    // Touch support
+    star.addEventListener('touchend', e => {
+      e.preventDefault();
+      current = parseInt(star.dataset.value);
+      row.dataset.current = current;
+      paint(current);
+    });
+  });
+});
+
+async function saveScore(ngId) {
+  const row = document.querySelector(`.star-row[data-ng-id="${ngId}"]`);
+  const stars = parseInt(row.dataset.current);
+  if (!stars) { alert('Please select a star rating.'); return; }
+
+  const variantContainer = document.getElementById(`variants-${ngId}`);
+  const preferredIds = variantContainer
+    ? [...variantContainer.querySelectorAll('input:checked')].map(el => parseInt(el.value))
+    : [];
+
+  const comment = document.getElementById(`comment-${ngId}`)?.value || '';
+
+  const res = await fetch(`/score/${groupId}/save/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ name_group_id: ngId, stars, preferred_variant_ids: preferredIds, comment }),
+  });
+
+  if (res.ok) {
+    const indicator = document.getElementById(`saved-${ngId}`);
+    indicator.style.display = 'inline';
+    setTimeout(() => indicator.style.display = 'none', 2500);
+  }
+}
+</script>
+{% endblock %}

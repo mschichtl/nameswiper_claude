@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}{{ group.name }} – NameSwiper{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-7">
+    <a href="{% url 'group_list' %}" class="text-muted small">← Back to groups</a>
+    <h2 class="h4 mt-2 mb-4">{{ group.name }}</h2>
+
+    <!-- Invite link -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h6 class="card-title">Invite link</h6>
+        <div class="input-group">
+          <input type="text" class="form-control form-control-sm font-monospace" id="invite-url" value="{{ invite_url }}" readonly>
+          <button class="btn btn-outline-secondary btn-sm" onclick="copyInvite()">Copy</button>
+        </div>
+        <p class="text-muted small mt-2 mb-0">Share this link with anyone you want to join the group.</p>
+      </div>
+    </div>
+
+    <!-- Members -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h6 class="card-title">Members</h6>
+        <ul class="list-group list-group-flush">
+          {% for member in members %}
+          <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <span>
+              {{ member.username }}
+              {% if member == group.owner %}
+                <span class="badge bg-secondary ms-1">owner</span>
+              {% endif %}
+            </span>
+            {% if user == group.owner and member != group.owner %}
+            <form method="post" action="{% url 'remove_member' group.pk member.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm"
+                onclick="return confirm('Remove {{ member.username }}?')">Remove</button>
+            </form>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Group actions -->
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'score' group.id %}" class="btn btn-primary btn-sm">Score names</a>
+      <a href="{% url 'results' group.id %}" class="btn btn-success btn-sm">View results</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function copyInvite() {
+    const el = document.getElementById('invite-url');
+    navigator.clipboard.writeText(el.value).then(() => {
+      const btn = el.nextElementSibling;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+</script>
+{% endblock %}

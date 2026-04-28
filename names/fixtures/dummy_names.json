@@ -1,0 +1,88 @@
+[
+  {"model": "names.namegroup", "pk": 1, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 1, "fields": {"group": 1, "name": "Michael"}},
+  {"model": "names.namevariant", "pk": 2, "fields": {"group": 1, "name": "Mikael"}},
+
+  {"model": "names.namegroup", "pk": 2, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 3, "fields": {"group": 2, "name": "Ruben"}},
+  {"model": "names.namevariant", "pk": 4, "fields": {"group": 2, "name": "Reuben"}},
+
+  {"model": "names.namegroup", "pk": 3, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 5, "fields": {"group": 3, "name": "Lucas"}},
+  {"model": "names.namevariant", "pk": 6, "fields": {"group": 3, "name": "Lukas"}},
+
+  {"model": "names.namegroup", "pk": 4, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 7, "fields": {"group": 4, "name": "Noah"}},
+
+  {"model": "names.namegroup", "pk": 5, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 8, "fields": {"group": 5, "name": "Leon"}},
+  {"model": "names.namevariant", "pk": 9, "fields": {"group": 5, "name": "Leo"}},
+
+  {"model": "names.namegroup", "pk": 6, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 10, "fields": {"group": 6, "name": "Felix"}},
+
+  {"model": "names.namegroup", "pk": 7, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 11, "fields": {"group": 7, "name": "Paul"}},
+
+  {"model": "names.namegroup", "pk": 8, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 12, "fields": {"group": 8, "name": "Anton"}},
+  {"model": "names.namevariant", "pk": 13, "fields": {"group": 8, "name": "Anthony"}},
+
+  {"model": "names.namegroup", "pk": 9, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 14, "fields": {"group": 9, "name": "Jakob"}},
+  {"model": "names.namevariant", "pk": 15, "fields": {"group": 9, "name": "Jacob"}},
+  {"model": "names.namevariant", "pk": 16, "fields": {"group": 9, "name": "Jake"}},
+
+  {"model": "names.namegroup", "pk": 10, "fields": {"sex": "M"}},
+  {"model": "names.namevariant", "pk": 17, "fields": {"group": 10, "name": "Elias"}},
+  {"model": "names.namevariant", "pk": 18, "fields": {"group": 10, "name": "Elijah"}},
+
+  {"model": "names.namegroup", "pk": 11, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 19, "fields": {"group": 11, "name": "Emma"}},
+  {"model": "names.namevariant", "pk": 20, "fields": {"group": 11, "name": "Ema"}},
+
+  {"model": "names.namegroup", "pk": 12, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 21, "fields": {"group": 12, "name": "Sofia"}},
+  {"model": "names.namevariant", "pk": 22, "fields": {"group": 12, "name": "Sophia"}},
+
+  {"model": "names.namegroup", "pk": 13, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 23, "fields": {"group": 13, "name": "Mia"}},
+
+  {"model": "names.namegroup", "pk": 14, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 24, "fields": {"group": 14, "name": "Anna"}},
+  {"model": "names.namevariant", "pk": 25, "fields": {"group": 14, "name": "Ana"}},
+
+  {"model": "names.namegroup", "pk": 15, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 26, "fields": {"group": 15, "name": "Lena"}},
+  {"model": "names.namevariant", "pk": 27, "fields": {"group": 15, "name": "Leena"}},
+
+  {"model": "names.namegroup", "pk": 16, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 28, "fields": {"group": 16, "name": "Clara"}},
+  {"model": "names.namevariant", "pk": 29, "fields": {"group": 16, "name": "Klara"}},
+
+  {"model": "names.namegroup", "pk": 17, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 30, "fields": {"group": 17, "name": "Julia"}},
+
+  {"model": "names.namegroup", "pk": 18, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 31, "fields": {"group": 18, "name": "Marie"}},
+  {"model": "names.namevariant", "pk": 32, "fields": {"group": 18, "name": "Maria"}},
+
+  {"model": "names.namegroup", "pk": 19, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 33, "fields": {"group": 19, "name": "Sarah"}},
+  {"model": "names.namevariant", "pk": 34, "fields": {"group": 19, "name": "Sara"}},
+
+  {"model": "names.namegroup", "pk": 20, "fields": {"sex": "F"}},
+  {"model": "names.namevariant", "pk": 35, "fields": {"group": 20, "name": "Emilia"}},
+  {"model": "names.namevariant", "pk": 36, "fields": {"group": 20, "name": "Amelia"}},
+
+  {"model": "names.namegroup", "pk": 21, "fields": {"sex": "N"}},
+  {"model": "names.namevariant", "pk": 37, "fields": {"group": 21, "name": "Alex"}},
+  {"model": "names.namevariant", "pk": 38, "fields": {"group": 21, "name": "Alexis"}},
+
+  {"model": "names.namegroup", "pk": 22, "fields": {"sex": "N"}},
+  {"model": "names.namevariant", "pk": 39, "fields": {"group": 22, "name": "Robin"}},
+  {"model": "names.namevariant", "pk": 40, "fields": {"group": 22, "name": "Robyn"}},
+
+  {"model": "names.namegroup", "pk": 23, "fields": {"sex": "N"}},
+  {"model": "names.namevariant", "pk": 41, "fields": {"group": 23, "name": "Jordan"}}
+]
